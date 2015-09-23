@@ -1,0 +1,3 @@
+[submodule "Fuzzer/requests"]
+	path = Fuzzer/requests
+	url = git@mygithost:331Fuzzer
