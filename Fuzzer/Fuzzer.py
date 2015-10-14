@@ -112,6 +112,22 @@ def guessPages(txtFile, url):
                 if response.status_code < 400:
                     print(url + line.strip() + ext)
 
+def senseData(theLink, vectors):
+    print ('Sensitive Data')
+    r = requests.get(theLink)
+    reqhtml =  html.fromstring(r.text)
+    ahreflist = reqhtml.xpath("//a/@href")
+    with open(vectors, 'r') as f:
+        for line in f:
+            for x in ahreflist:
+                #result = urlparse(x)
+                content = requests.get(theLink+x)
+                if (content.text).find(line) == -1:
+                    print (line + ' is not in location ' + x)
+                # print(content.text)
+                print('Potential security concern for ' + line + ' in ' + theLink + x)
+
+
 
 def discover():
     print textwrap.dedent(
@@ -148,6 +164,7 @@ OPTIONS:
             print('Searching Common Words: ')
             guessPages(x.split('=')[1], url)
     if operator.eq(command, 'discover'):
+        #discover functionality
         print('Discovering Links: ')
         getLinks(url)
         print('Parse URLs: ')
@@ -157,7 +174,17 @@ OPTIONS:
         print('Get Inputs: ')
         getInputs(url)
     else:
-        print ('Nothing yet, save for test functionality')
+        #test functionality
+        print ('Discovering All Inputs: ')
+        getInputs(url)
+        print ('Checking For Sensitive Data')
+        for x in options:
+            if operator.contains(x, '--vectors='):
+                print('Looking For Potential Threats In Vectors: ')
+                senseData(url, x.split('=')[1])
+            if operator.contains(x, '--sensitive='):
+                print('Looking For Potential Sensitive Information: ')
+                senseData(url, x.split('=')[1])
 
 
 discover()
