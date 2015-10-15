@@ -135,10 +135,10 @@ def senseData(theLink, vectors):
 
 def lackSanitize(theLink, escape_chars):
     if theLink == 'http://127.0.0.1/dvwa/login.php':
-        custAuth('dvwa')
+        session = custAuth('dvwa')
 
     if theLink == 'http://127.0.0.1:8080/bodgeit/login.jsp':
-        custAuth('bodgeit')
+        session = custAuth('bodgeit')
 
     r = getInputs(theLink)
     size = len(r) #gets the size of the amount of inputs based on myLink.
@@ -151,8 +151,8 @@ def lackSanitize(theLink, escape_chars):
 # and are then submitted if possible. The issue is that depending on the page, the forms have different
 # submit values depending on the page. For example: this url has  (http://127.0.0.1/dvwa/vulnerabilities/brute/)
 # has a submit value of 'Login', while this url (http://127.0.0.1/dvwa/vulnerabilities/xss_s/) has a submit value
-# of 'Sign Guestbook'. So I am not too sure how to go about getting those values and plugging them into the payload
-# for that page.
+# of 'Sign Guestbook'. So I am not too sure how to go about getting those values dynamically and plugging them into the
+# payload for that page.
             if size == 2:
                 payload = {
                 r[0]: f,
@@ -164,8 +164,8 @@ def lackSanitize(theLink, escape_chars):
                 r[1]: f,
                 r[2]: '*VARIABLE*'
             }
-            with requests.Session() as s:
-                p = s.post(theLink, data=payload)
+
+                p = session.post(theLink, data=payload)
                 text = p.text
                 if '&lt' not in text:
                     print ('< is not sanitized.')
