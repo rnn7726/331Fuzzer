@@ -3,7 +3,7 @@ import textwrap
 import operator
 from lxml import html
 from urlparse import urlparse
-
+from datetime import timedelta
 
 #test purposes
 def links():
@@ -127,7 +127,89 @@ def senseData(theLink, vectors):
                 # print(content.text)
                 print('Potential security concern for ' + line + ' in ' + theLink + x)
 
+def lackSanitize(theLink, escape_chars):
+    print ('Discovering Sanitization:')
 
+    if theLink == 'http://127.0.0.1/dvwa/login.php':
+        custAuth('dvwa')
+
+    if theLink == 'http://127.0.0.1:8080/bodgeit/login.jsp':
+        custAuth('bodgeit')
+
+    r = getInputs(theLink)
+    size = len(r) #gets the size of the amount of inputs based on myLink.
+    with open(escape_chars, 'r') as f:
+        for line in f:
+#I know these multiple if-statements arent the best but I was running into problems
+# I couldnt get around related to the payload variable, on DVWA the number of input
+# forms per page doesnt surpass 3 which is why I hardcoded in the if statements.
+# So what happens is all the escape characters get entered into all available input pages on the page,
+# and are then submitted if possible. The issue is that depending on the page, the forms have different
+# submit values depending on the page. For example: this url has  (http://127.0.0.1/dvwa/vulnerabilities/brute/)
+# has a submit value of 'Login', while this url (http://127.0.0.1/dvwa/vulnerabilities/xss_s/) has a submit value
+# of 'Sign Guestbook'. So I am not too sure how to go about getting those values and plugging them into the payload
+# for that page.
+            if size == 2:
+                payload = {
+                r[0]: f,
+                r[1]: '*VARIABLE*',
+            }
+
+            if size == 3:
+                payload = {
+                r[0]: f,
+                r[1]: f,
+                r[2]: '*VARIABLE*'
+            }
+                with requests.Session() as s:
+                    p = s.post(theLink, data=payload)
+                    text = p.text
+                    if '&lt' not in text:
+                        print '< is not sanitized.'
+
+                    if '&gt' not in text:
+                        print '> is not sanitized.'
+
+                    if '&amp' not in text:
+                        print '& is not sanitized.'
+
+                    if '&quot' not in text:
+                        print " ' is not sanitized."
+
+                    if '&#39' not in text:
+                        print '" is not sanitized.'
+
+
+
+
+# checks for delayed responses or HTTP response error codes on the website
+# if an error or delay is found => prints human readable error message
+# if no error or delay is found => prints nothing
+# theLink => URL of the home page we are fuzzing
+
+def checkHTTPResponses(theLink):
+    print ('Checking HTTP Responses: ')
+    print ('Checking Now...')
+    #r = requests.get(theLink)
+    #reqhtml =  html.fromstring(r.text)
+    #ahreflist = reqhtml.xpath("//a/@href")
+    #for x in ahreflist:
+        #response = requests.get(theLink + line.strip() + ext)
+        #if response.status_code == 408 or response.elapsed.seconds >= 5:
+            # response took longer than 5 seconds or timed out
+        #    print("Delayed response: " + theLink + line.strip() + ext)
+        #elif response.status_code == 404:
+            # response told us that the page does not exist
+        #    print("Page not found: " + theLink + line.strip() + ext)
+        #elif response.status_code == 400:
+            # response told us it was a bad request
+        #    print("Bad request: " + theLink + line.strip() + ext)
+        #elif response.status_code == 401 or response.status_code == 403:
+            # response told us we are unauthorized to access the page
+        #    print("Unauthorized access: " + theLink + line.strip() + ext)
+        #elif response.status_code >= 500:
+            # response told us there was a server error
+        #    print("Server error: " + theLink + line.strip() + ext)
 
 def discover():
     print textwrap.dedent(
@@ -185,6 +267,8 @@ OPTIONS:
             if operator.contains(x, '--sensitive='):
                 print('Looking For Potential Sensitive Information: ')
                 senseData(url, x.split('=')[1])
+        print ('Checking For Sanitized Data: ')
+        lackSanitize(url, '<')
 
 
 discover()
