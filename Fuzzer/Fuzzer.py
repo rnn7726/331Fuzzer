@@ -267,7 +267,7 @@ OPTIONS:
             if operator.contains(x, '--sensitive='):
                 print('Looking For Potential Sensitive Information: ')
                 senseData(url, x.split('=')[1])
-        print ('Checking For Sanitized Data: ')
+        print ('Checking Forpul Sanitized Data: ')
         lackSanitize(url, '<')
 
 
