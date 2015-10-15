@@ -4,3 +4,7 @@ name
 security
 token
 password
+fuzzy
+dvwa
+bodgeit
+test

@@ -127,10 +127,11 @@ def senseData(theLink, vectors):
             for x in ahreflist:
                 #result = urlparse(x)
                 content = requests.get(theLink+x)
-                if (content.text).find(line) == -1:
+                #print (content.text)
+                if (content.text.find(line)) == -1:
                     print (line + ' is not in location ' + x)
-                # print(content.text)
-                print('Potential security concern for ' + line + ' in ' + theLink + x)
+                else:
+                    print('Potential security concern for ' + line + ' in ' + theLink + x)
 
 def lackSanitize(theLink, escape_chars):
     if theLink == 'http://127.0.0.1/dvwa/login.php':
@@ -157,30 +158,32 @@ def lackSanitize(theLink, escape_chars):
                 r[0]: f,
                 r[1]: '*VARIABLE*',
             }
-
             if size == 3:
                 payload = {
                 r[0]: f,
                 r[1]: f,
                 r[2]: '*VARIABLE*'
             }
-                with requests.Session() as s:
-                    p = s.post(theLink, data=payload)
-                    text = p.text
-                    if '&lt' not in text:
-                        print '< is not sanitized.'
+            with requests.Session() as s:
+                p = s.post(theLink, data=payload)
+                text = p.text
+                if '&lt' not in text:
+                    print ('< is not sanitized.')
 
-                    if '&gt' not in text:
-                        print '> is not sanitized.'
+                if '&gt' not in text:
+                    print ('> is not sanitized.')
 
-                    if '&amp' not in text:
-                        print '& is not sanitized.'
+                if '&amp' not in text:
+                    print ('& is not sanitized.')
 
-                    if '&quot' not in text:
-                        print " ' is not sanitized."
+                if '&quot' not in text:
+                    print (" ' is not sanitized.")
 
-                    if '&#39' not in text:
-                        print '" is not sanitized.'
+                if '&#39' not in text:
+                    print ('" is not sanitized.')
+
+                else:
+                    print ('Data is sanitized')
 
 
 
@@ -271,7 +274,7 @@ OPTIONS:
                 print('Looking For Potential Sensitive Information: ')
                 senseData(url, x.split('=')[1])
         print ('Checking For Sanitized Data: ')
-        lackSanitize(url, '<')
+        lackSanitize(url, 'escape_chars.txt')
 
 
 discover()
