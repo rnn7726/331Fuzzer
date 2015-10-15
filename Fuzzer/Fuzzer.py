@@ -123,6 +123,7 @@ def senseData(theLink, vectors):
     ahreflist = reqhtml.xpath("//a/@href")
     with open(vectors, 'r') as f:
         for line in f:
+            print ('Concerning ' + line)
             for x in ahreflist:
                 #result = urlparse(x)
                 content = requests.get(theLink+x)
@@ -132,8 +133,6 @@ def senseData(theLink, vectors):
                 print('Potential security concern for ' + line + ' in ' + theLink + x)
 
 def lackSanitize(theLink, escape_chars):
-    print ('Discovering Sanitization:')
-
     if theLink == 'http://127.0.0.1/dvwa/login.php':
         custAuth('dvwa')
 
@@ -263,15 +262,15 @@ OPTIONS:
         #test functionality
         print ('Discovering All Inputs: ')
         getInputs(url)
-        print ('Checking For Sensitive Data')
+        print ('Checking For Sensitive Data: ')
         for x in options:
             if operator.contains(x, '--vectors='):
                 print('Looking For Potential Threats In Vectors: ')
-                senseData(url, x.split('=')[1])
+                #senseData(url, x.split('=')[1])
             if operator.contains(x, '--sensitive='):
                 print('Looking For Potential Sensitive Information: ')
                 senseData(url, x.split('=')[1])
-        print ('Checking Forpul Sanitized Data: ')
+        print ('Checking For Sanitized Data: ')
         lackSanitize(url, '<')
 
 
