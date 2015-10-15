@@ -57,6 +57,7 @@ def getInputs(theLink):
     inputnamelist = reqhtml.xpath("//input/@type")
     for x in inputnamelist:
         print ('Type: ' + x)
+    return inputnamelist
 
 
 def parseURL(theLink):
@@ -75,6 +76,7 @@ def getCookies(theLink):
 
 
 def custAuth(name):
+    session = requests.session()
     if operator.eq(name, 'dvwa'):
         # Fill in your details here to be posted to the login form.
         payload = {
@@ -84,10 +86,11 @@ def custAuth(name):
         }
 
         # Use 'with' to ensure the session context is closed after use.
-        with requests.Session() as s:
-            p = s.post('http://127.0.0.1/dvwa/login.php', data=payload)
-            # print the html returned or something more intelligent to see if it's a successful login page.
-            print p.text
+
+        p = session.post('http://127.0.0.1/dvwa/login.php', data=payload)
+
+        return session
+
     if operator.eq(name, 'bodgeit'):
         # Fill in your details here to be posted to the login form.
         payload = {
@@ -97,10 +100,11 @@ def custAuth(name):
         }
 
         # Use 'with' to ensure the session context is closed after use.
-        with requests.Session() as s:
-            p = s.post('http://127.0.0.1:8080/bodgeit/login.jsp', data=payload)
-            # print the html returned or something more intelligent to see if it's a successful login page.
-            print(p.text)
+
+        p = session.post('http://127.0.0.1:8080/bodgeit/login.jsp', data=payload)
+
+        return session
+
 
 
 def guessPages(txtFile, url):
