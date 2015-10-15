@@ -57,6 +57,7 @@ def getInputs(theLink):
     inputnamelist = reqhtml.xpath("//input/@type")
     for x in inputnamelist:
         print ('Type: ' + x)
+    return inputnamelist
 
 
 def parseURL(theLink):
@@ -75,6 +76,7 @@ def getCookies(theLink):
 
 
 def custAuth(name):
+    session = requests.session()
     if operator.eq(name, 'dvwa'):
         # Fill in your details here to be posted to the login form.
         payload = {
@@ -84,10 +86,11 @@ def custAuth(name):
         }
 
         # Use 'with' to ensure the session context is closed after use.
-        with requests.Session() as s:
-            p = s.post('http://127.0.0.1/dvwa/login.php', data=payload)
-            # print the html returned or something more intelligent to see if it's a successful login page.
-            print p.text
+
+        p = session.post('http://127.0.0.1/dvwa/login.php', data=payload)
+
+        return session
+
     if operator.eq(name, 'bodgeit'):
         # Fill in your details here to be posted to the login form.
         payload = {
@@ -97,10 +100,11 @@ def custAuth(name):
         }
 
         # Use 'with' to ensure the session context is closed after use.
-        with requests.Session() as s:
-            p = s.post('http://127.0.0.1:8080/bodgeit/login.jsp', data=payload)
-            # print the html returned or something more intelligent to see if it's a successful login page.
-            print(p.text)
+
+        p = session.post('http://127.0.0.1:8080/bodgeit/login.jsp', data=payload)
+
+        return session
+
 
 
 def guessPages(txtFile, url):
@@ -126,6 +130,52 @@ def senseData(theLink, vectors):
                     print (line + ' is not in location ' + x)
                 # print(content.text)
                 print('Potential security concern for ' + line + ' in ' + theLink + x)
+
+def lackSanitize(theLink, escape_chars):
+    print ('Discovering Sanitization:')
+
+    if theLink == 'http://127.0.0.1/dvwa/login.php':
+        session = custAuth('dvwa')
+
+    if theLink == 'http://127.0.0.1:8080/bodgeit/login.jsp':
+        session = custAuth('bodgeit')
+
+    r = getInputs(theLink)
+    size = len(r)
+    with open(escape_chars, 'r') as f:
+        for line in f:
+            if size == 2:
+                payload = {
+                r[0]: f,
+                r[1]: 'Submit',
+            }
+
+            if size == 3:
+                payload = {
+                r[0]: f,
+                r[1]: f,
+                r[2]: 'Submit'
+            }
+
+            p = session.post(theLink, data=payload)
+            text = p.text
+            if '&lt' not in text:
+                print '< is not sanitized.'
+
+            if '&gt' not in text:
+                print '> is not sanitized.'
+
+            if '&amp' not in text:
+                print '& is not sanitized.'
+
+            if '&quot' not in text:
+                print " ' is not sanitized."
+
+            if '&#39' not in text:
+                print '" is not sanitized.'
+
+
+
 
 
 
